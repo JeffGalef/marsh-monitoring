@@ -85,7 +85,7 @@ def createTSplot(fig, extent, controlStations, deficiencyPeriod, color):
 def createBackground(fig, ax):
     
     #Read in the hydrography shapefile.
-    mapDf = gp.read_file(r'\\cnrastore\data_GIS\marsh.shp')
+    mapDf = gp.read_file(r'data_GIS\marsh.shp')
     
     #Plot all the channels.
     mapDf.plot(color=('lightsteelblue'), edgecolor='none', ax=ax, zorder=0, alpha=0.3)
@@ -100,7 +100,7 @@ def createBackground(fig, ax):
     mapDf.plot(color=('lightblue'), edgecolor='lightblue', ax=ax, zorder=0, alpha=1)    
      
     #Use Geopandas to read the stations shapefile.
-    stationsDF = gp.read_file(r'\\cnrastore\data_GIS\stations.shp')
+    stationsDF = gp.read_file(r'data_GIS\stations.shp')
     
     #Use a query to separate the compliance from the monitoring stations for colorizing.    
     stationsCompliance = stationsDF.query("type == 'compliance'")

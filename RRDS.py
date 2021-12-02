@@ -511,7 +511,7 @@ def prepFiles():
     
     import shutil, os
     
-    rootDir = r'\\cnrastore\Flood Up'
+    rootDir = r'\Flood Up'
     
     lastWeek = f'{pd.Timestamp.today() - pd.offsets.Week(weekday=2):%Y_%m_%d}'
     
