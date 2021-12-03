@@ -57,7 +57,7 @@ def getPortal_async(start,end):
     """Returns a dataframe of stage and operational data.  Only is called
     when data are to be retrieved from portal.  This function USES asycio, but is on hold since
     it causes Spyder to lock up.  Use again if Spyder ever solves the issue.  It is quite
-    a bit faster than getWQP()."""
+    a bit faster than getPortal()."""
     
     from io import StringIO
     import asyncio
@@ -117,7 +117,7 @@ def getWW_async(opsData):
         #Rename the columns from 'VALUE' to the CDEC name of the station.
         cdf.rename(columns={'VALUE':cdec},inplace=True)
         
-        #Rename index to match the name of the index from WQP.
+        #Rename index to match the name of the index from Portal.
         cdf.index.rename('time',inplace=True)
         
         cdfs.append(cdf)
@@ -158,7 +158,7 @@ def getWW(opsData):
     
     
 
-def createCharts1(opsData='WQP', start=start, end=end, outFile1='Flood Up 1.pdf', 
+def createCharts1(opsData='Portal', start=start, end=end, outFile1='Flood Up 1.pdf', 
                   charts2=False, outFile2='Flood Up 2.pdf',predictions=False):
     
     """Creates the 4 charts used to monitor the performance of the RRDS.  The
@@ -167,7 +167,7 @@ def createCharts1(opsData='WQP', start=start, end=end, outFile1='Flood Up 1.pdf'
     data are retrieved from CDEC with the following respecitve station symbols:
     MSL, ROR, and PEL.   
     
-    By default, the ops data are retrieved from WQP, but
+    By default, the ops data are retrieved from Portal, but
     the user has the option of providing a CSV file retrieved from Wonderware.
     To use the CSV fucntionality, pass the full file path to the function
     with the 'opsData' argument.   
@@ -187,9 +187,9 @@ def createCharts1(opsData='WQP', start=start, end=end, outFile1='Flood Up 1.pdf'
     legendLabelSize = 8  
     dataLabelSize = 8  
 
-    #Get ops data from either WQP or CDEC/Wonderware.
-    if opsData=='WQP':
-        # df = getWQP_async(pd.Timestamp(start),pd.Timestamp(end))
+    #Get ops data from either Portal or CDEC/Wonderware.
+    if opsData=='Portal':
+        # df = getPortal_async(pd.Timestamp(start),pd.Timestamp(end))
         df = getPortalData(pd.Timestamp(start),pd.Timestamp(end))
     else:
         df = getWW(opsData)        
@@ -419,7 +419,7 @@ if __name__=='__main__':
        
     The default setting plots the last 7 days.   If another time interival is desired, specify starting
     and ending dates, and pass them as follows, createCharts1(start='2020-12-1',end='2020-12-8').   This will
-    only work when obtaining data from WQP.   
+    only work when obtaining data from Portal.   
     
     If using data from a Wonderware CSV file, specify the full path of file with the opsData=<full path> arugment,
     and pass it to createCharts1(opsData).   No start and end dates are needed, as the CSV file will be used
@@ -437,7 +437,7 @@ if __name__=='__main__':
     """
     
     
-    # Default is for Chart 1 only using the last 7 days using data from WQP:
+    # Default is for Chart 1 only using the last 7 days using data from Portal:
     createCharts1()    
     
     #If using data directly from a Wonderware CSV file, enter the full path and pass it as an argument:
@@ -459,7 +459,7 @@ if __name__=='__main__':
     #Just create the predictions chart.
     # mytools.predictedTidesChart(29)
     
-    # Set a different time period using data from WQP here:       
+    # Set a different time period using data from Portal here:       
     # createCharts1(start='2021-10-7',end='2021-10-20')     
         
         
