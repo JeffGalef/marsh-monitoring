@@ -40,79 +40,22 @@ start = pd.Timestamp.now()-pd.DateOffset(days=7)
 end = pd.Timestamp.now()
 
 
-def getWQP(start,end):
+def getPortalData(start,end):
        
-    """Returns a dataframe of stage and operational data from WQP.  Only is called
-    when data is to be retrieved from WQP.  This function does NOT use asycio, since
+    """Returns a dataframe of stage and operational data.  Only is called
+    when data are to be retrieved from our portal.  This function does NOT use asycio, since
     it causes Spyder to lock up.  Discontinue use if Spyder ever fixes the problem."""
     
-    #Specify columns to be returned when reading WQP Detailed Results table.    
-    usecols = ['result_id','station_id','station_name','analyte_name','interval_name'] 
-    
-    #Read in WQP Detailed Results table.
-    #Cannot share API from work.
-    results = pd.read_csv(
-        'API URL',
-        sep='|',usecols=usecols)
 
-    #Make a list of analytes to be fetched for the RRDS station.
-    analytes=[f'Gate Position {i}' for i in range(1,9)]
-    analytes.append('Stage Difference: Montezuma / Fishscreen')
-    analytes.append('Velocity At Fish Screens')
-    
-    #Use analytes list to make a query to be used to retrieve all analytes for the RRDS station.
-    query = "(station_id==RRDS & interval_name=='15 min' & (" + \
-    ' | '.join([f"analyte_name=='{analyte}'" for analyte in analytes])+'))'
-    
-    #Add to the query information for retrieving stage data from MSL, ROR, and PEL.
-    for station in [1171,1172,11120]:
-        query = query + f"| (station_id=={station} & interval_name=='15 min' & analyte_name=='Stage')"
-        
-    #Use query to retrieve a list of Result IDs (rids) to be used for querying the data.
-    rids = results.query(query)['result_id'].to_list()
-    
-    #Create an empty of list of URLs that will be used to retrieve the data.
-    urls=[]
-
-    #Using Result IDs in rids, build the URLs and append them to the urls list.
-    #Cannot share API from work.
-    for rid in rids:          
-        url = 'API URL'\
-        f'&resultid={rid}&start={start:%Y-%m-%d:%H:%M:%S}&end={end:%Y-%m-%d:%H:%M:%S}&version=1'     
-        urls.append(url)
-        
-    #Create an empty list to hold the dataframes created from the responses.
-    dfs=[]
-    
-    #Don't use the final 3 URLs because they're placeholders for when the stage data at ROR, PEL, and MSL
-    #get transferred to the new RIDS.  Remember to ditch the first 3 URLS when this happens.
-    for url in urls[:-3]:
-        
-        df = pd.read_csv(url,sep='|',index_col='time',parse_dates=['time'],na_values='null',usecols=['time','value'])
-        dfs.append(df)
-        
-    df = pd.concat(dfs, axis=1)
-    
-    colNames = ['MSL','ROR', 'PEL', 'Gate1', 'Gate2', 'Gate3', 'Gate4', 'Gate5', 'Gate6', 'Gate7', 'Gate8', 
-                'StageDiff', 'Velocity']
-    
-    
-    df.columns = colNames
-    
-    df.loc[:,['MSL','ROR','PEL']] = df.loc[:,['MSL','ROR','PEL']] - 2.49
-
- 
-    #Create a column for the mean of the 8 Gate Positions.       
-    df['GatesMean'] = df.loc[:,[f'Gate{i}' for i in range(1,9)]].mean(axis=1,skipna=True)    
-    
+    #Cannot share due to agency security policy.
     
     return df    
 
 
-def getWQP_async(start,end):
+def getPortal_async(start,end):
     
-    """Returns a dataframe of stage and operational data from WQP.  Only is called
-    when data are to be retrieved from WQP.  This function USES asycio, but is on hold since
+    """Returns a dataframe of stage and operational data.  Only is called
+    when data are to be retrieved from portal.  This function USES asycio, but is on hold since
     it causes Spyder to lock up.  Use again if Spyder ever solves the issue.  It is quite
     a bit faster than getWQP()."""
     
@@ -120,85 +63,9 @@ def getWQP_async(start,end):
     import asyncio
     import nest_asyncio
     nest_asyncio.apply()
-    
-    
-    """Returns a dataframe of stage and operational data from WQP.  Only is called
-    when data is to be retrieved from WQP."""
-    
-    #Specify columns to be returned when reading WQP Detailed Results table.    
-    usecols = ['result_id','station_id','station_name','analyte_name','interval_name'] 
-    
-    #Read in WQP Detailed Results table.
-    #Cannot share API from work.
-    results = pd.read_csv('API URL',sep='|',usecols=usecols)
-
-    #Make a list of analytes to be fetched for the RRDS station.
-    analytes=[f'Gate Position {i}' for i in range(1,9)]
-    analytes.append('Stage Difference: Montezuma / Fishscreen')
-    analytes.append('Velocity At Fish Screens')
-    
-    #Use analytes list to make a query to be used to retrieve all analytes for the RRDS station.
-    query = "(station_id==RRDS & interval_name=='15 min' & (" + \
-    ' | '.join([f"analyte_name=='{analyte}'" for analyte in analytes])+'))'
-    
-    #Add to the query information for retrieving stage data from MSL, ROR, and PEL.
-    for station in [1171,1172,11120]:
-       query = query + f"| (station_id=={station} & interval_name=='15 min' & analyte_name=='Stage')"
-        
-    #Use query to retrieve a list of Result IDs (rids) to be used for querying the data.
-    rids = results.query(query)['result_id'].to_list()
-    
-    #Create an empty of list of URLs that will be sent to the asyncio/aioattp API retrieval function.
-    urls=[]
-
-    #Using Result IDs in rids, build the URLs and append them to the urls list.
-    #Cannot share API from work.
-    for rid in rids:          
-        url = 'API URL'\
-        f'&resultid={rid}&start={start:%Y-%m-%d:%H:%M:%S}&end={end:%Y-%m-%d:%H:%M:%S}&version=1'     
-        urls.append(url)
-
-    #Send over URLs list to the fech_all function in mytools, and retrieve the text responses.
-    #I eliminated the final 3 because they are empty Stage data holders for when Michael K. combines all
-    #sensor data in one Result ID for each station/analyte.   
-    
-    #CHANGE THIS CODE BY ELIMINATING THE [:-3] PORTION WHEN MICHAEL K. SAYS THE WORK IS DONE.
-    resps = asyncio.run(mytools.fetch_all(urls[:-3]))    
-
-    #Create an empty list to hold the dataframes created from the responses.
-    dfs=[]
-        
-    #First, loop through the stage data responses, since they were the first 3 Result IDs.
-    cdecs=['MSL','ROR','PEL']       
-    for resp,cdec in zip(resps[:3],cdecs):
        
-       #Use StringIO to covert the text responses into a format that pd.read_csv() can use.
-       df = pd.read_csv(StringIO(resp),sep='|',index_col='time',parse_dates=['time'],na_values='null',usecols=['time','value'])
-
-       #Subtract off 2.49 to switch from NAVD88 to NGVD29.
-       df['value'] = df['value']-2.49
+    #Cannot share due to agency security policy.
        
-       #Rename the columns from 'value' to the CDEC name of the station.
-       df.rename(columns={'value':cdec},inplace=True)
-       
-       dfs.append(df)      
-    
-    #Second, loop through the remaining operational data from the RRDS station.
-    for resp,analyte in zip(resps[3:],analytes):
-       df = pd.read_csv(StringIO(resp),sep='|',index_col='time',parse_dates=['time'],na_values='null',usecols=['time','value'])
-       df.rename(columns={'value':analyte},inplace=True)
-       dfs.append(df)
-       
-    #Concatenate all the dataframes columnwise.
-    df = pd.concat(dfs,axis=1)
-    
-    #Rename the Stage Differentential and Gate Opening columns to be shorter.
-    df.rename(columns={'Velocity At Fish Screens':'Velocity','Stage Difference: Montezuma / Fishscreen':'StageDiff'},inplace=True)
-    df.rename(columns=dict(zip([f'Gate Position {i}' for i in range(1,9)],[f'Gate{i}' for i in range(1,9)])),inplace=True)
- 
-    #Create a column for the mean of the 8 Gate Positions.       
-    df['GatesMean'] = df.loc[:,[f'Gate{i}' for i in range(1,9)]].mean(axis=1,skipna=True)    
-    
     return df    
 
 
@@ -323,7 +190,7 @@ def createCharts1(opsData='WQP', start=start, end=end, outFile1='Flood Up 1.pdf'
     #Get ops data from either WQP or CDEC/Wonderware.
     if opsData=='WQP':
         # df = getWQP_async(pd.Timestamp(start),pd.Timestamp(end))
-        df = getWQP(pd.Timestamp(start),pd.Timestamp(end))
+        df = getPortalData(pd.Timestamp(start),pd.Timestamp(end))
     else:
         df = getWW(opsData)        
 
