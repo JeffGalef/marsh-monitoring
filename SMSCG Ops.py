@@ -18,9 +18,10 @@ from matplotlib.ticker import FixedLocator
 import matplotlib.dates as mdates
 
 
-start='2020-10-1'
-end='2020-10-31'  
-
+start='2021-10-1'
+end='2021-10-31'  
+start='2021-10-15'
+end='2021-11-15'  
 
 dto = mytools.getCDECseries('DTO', '23', 'D', start, end)
 phases = mytools.getLunarPhases(start,end)
@@ -58,16 +59,16 @@ axStage.plot(stages)
 
 markersize=30
 
+#Map the lunar phases to unicode characters.
+phaseMap={'full moon':'$\u25CB$',
+          'new moon':'$\u25CF$',
+          'first quarter':'$\u25D0$',
+          'last quarter':'$\u25D1$'}
 
-phases['place holder'] = 1
-axLunar.plot(phases.loc[phases['Phase']=='new moon',['place holder']],linewidth=0,markeredgecolor='None',
-          markerfacecolor='black',mew=.0001,markersize=markersize,marker='$\u25CF$')
-axLunar.plot(phases.loc[phases['Phase']=='full moon',['place holder']],linewidth=0,markeredgecolor='None',
-          markerfacecolor='black',mew=.0001,markersize=markersize,marker='$\u25CB$')
-axLunar.plot(phases.loc[phases['Phase']=='first quarter',['place holder']],linewidth=0,markeredgecolor='None',
-          markerfacecolor='black',mew=.0001,markersize=markersize,marker='$\u25D0$')
-axLunar.plot(phases.loc[phases['Phase']=='last quarter',['place holder']],linewidth=0,markeredgecolor='None',
-          markerfacecolor='black',mew=.0001,markersize=markersize,marker='$\u25D1$')
+for i in range(len(phases)):
+    axLunar.plot(phases.index[i],10,linewidth=0,markeredgecolor='None',
+              markerfacecolor='black',mew=.0001,markersize=markersize,marker=phaseMap[phases.iloc[i,0]])
+
 
 axLunar.set_ylabel('Lunar\nPhase',labelpad=10)
 axStage.set_ylabel('Stage at\nPort Chicago\n(feet)',labelpad=10)
@@ -82,7 +83,7 @@ axLunar.xaxis.set_ticks([])
 axFlow.yaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
 
 
-locator = mdates.DayLocator(interval=7,tz='US/Pacific')
+locator = mdates.DayLocator(interval=7,tz='US/Pacific',interval_multiples=True)
 axFlow.xaxis.set_major_locator(locator)
 
 axFlow.xaxis.set_ticks([])
