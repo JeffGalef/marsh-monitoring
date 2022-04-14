@@ -1,19 +1,19 @@
 # marsh-monitoring
 Scripts used to monitor the Suisun Marsh in California.
 
-SMSCG Ops
+Suisun Marsh Salinity Control Gate Operations
 
 ![image](https://user-images.githubusercontent.com/63121889/144684312-a8eabbb4-ed9e-4293-b865-f830e7d0a8d2.png)
 
 
 
 
-RRDS
+Roaring River Distribution System Operations
 
 ![image](https://user-images.githubusercontent.com/63121889/144673963-38b484e3-34bb-49cb-a02b-8a4169827aff.png)
 
 
-SalinityTracking
+Salinity Tracking
 
 ![image](https://user-images.githubusercontent.com/63121889/163425486-d144d769-c1e6-43e6-9964-b66b1d95ce8d.png)
 
