@@ -1,5 +1,5 @@
 # marsh-monitoring
-Scripts used to monitor the Suisun Marsh in California.
+Scripts used to monitor and manage the Suisun Marsh in California.
 
 Suisun Marsh Salinity Control Gate Operations
 
